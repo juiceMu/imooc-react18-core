@@ -1,4 +1,10 @@
-import { HostComponent, HostRoot, HostText } from "./ReactWorkTags";
+import {
+  HostComponent,
+  HostRoot,
+  HostText,
+  FunctionComponent,
+} from "./ReactWorkTags";
+import { renderWithHooks } from "./ReactFiberHooks";
 import { processUpdateQueue } from "./ReactFiberClassUpdateQueue";
 import { mountChildFibers, reconcileChildFibers } from "./ReactChildFiber";
 import { shouldSetTextContent } from "react-dom-bindings/src/client/ReactDOMHostConfig";
@@ -60,8 +66,13 @@ function updateHostComponent(current, workInProgress) {
  * @returns {FiberNode|null} 新的子Fiber节点或者nul
  */
 export function beginWork(current, workInProgress) {
-  console.log("开始beginWork: ");
   switch (workInProgress.tag) {
+    case IndeterminateComponent:
+      return mountIndeterminateComponent(
+        current,
+        workInProgress,
+        workInProgress.type
+      );
     case HostRoot:
       return updateHostRoot(current, workInProgress);
     case HostComponent:
@@ -71,4 +82,16 @@ export function beginWork(current, workInProgress) {
     default:
       return null;
   }
+}
+
+export function mountIndeterminateComponent(
+  current,
+  workInProgress,
+  Component
+) {
+  const props = workInProgress.pendingProps;
+  const value = renderWithHooks(current, workInProgress, Component, props);
+  workInProgress.tag = FunctionComponent;
+  reconcileChildren(current, workInProgress, value);
+  return workInProgress.child;
 }

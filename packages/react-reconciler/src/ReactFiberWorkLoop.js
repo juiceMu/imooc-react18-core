@@ -39,7 +39,7 @@ function performConcurrentWorkOnRoot(root) {
  * @param {*} root - 根节点。
  */
 function commitRoot(root) {
-  console.log("开始commitWork");
+  console.log("开始commitWork:", root);
   const { finishedWork } = root;
   const subtreeHasEffects =
     (finishedWork.subtreeFlags & MutationMask) !== NoFlags;
@@ -102,7 +102,7 @@ function completeUnitOfWork(unitOfWork) {
     const current = completedWork.alternate;
     const returnFiber = completedWork.return;
     completeWork(current, completedWork);
-    const siblingFiber = completedWork.siblingFiber;
+    const siblingFiber = completedWork.sibling;
     if (siblingFiber !== null) {
       workInProgress = siblingFiber;
       return;

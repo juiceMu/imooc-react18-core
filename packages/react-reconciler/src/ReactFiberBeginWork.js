@@ -3,6 +3,7 @@ import {
   HostRoot,
   HostText,
   FunctionComponent,
+  IndeterminateComponent,
 } from "./ReactWorkTags";
 import { renderWithHooks } from "./ReactFiberHooks";
 import { processUpdateQueue } from "./ReactFiberClassUpdateQueue";

@@ -39,7 +39,6 @@ function performConcurrentWorkOnRoot(root) {
  * @param {*} root - 根节点。
  */
 function commitRoot(root) {
-  console.log("开始commitWork:", root);
   const { finishedWork } = root;
   const subtreeHasEffects =
     (finishedWork.subtreeFlags & MutationMask) !== NoFlags;

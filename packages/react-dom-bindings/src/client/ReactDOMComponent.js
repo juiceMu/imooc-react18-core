@@ -5,6 +5,9 @@ import setTextContent from "./setTextContent";
 // 引入DOM属性设置函数
 import { setValueForProperty } from "./DOMPropertyOperations";
 
+const STYLE = "style";
+const CHILDREN = "children";
+
 /**
  * 设置初始DOM属性
  * @param {*} tag DOM元素标签名
@@ -43,4 +46,112 @@ function setInitialDOMProperties(tag, domElement, nextProps) {
  */
 export function setInitialProperties(domElement, tag, props) {
   setInitialDOMProperties(tag, domElement, props);
+}
+
+/**
+ *
+ * @param {*} domElement
+ * @param {*} tag
+ * @param {Object} lastProps 旧的属性
+ * @param {Object} nextProps 新的属性
+ * @returns {Array} 返回的数组格式为[key,value,key,value]
+ */
+export function diffProperties(domElement, tag, lastProps, nextProps) {
+  let updatePayload = null;
+  let propKey;
+  let styleName;
+  let styleUpdates = null;
+  for (propKey in lastProps) {
+    // 遍历老属性，过滤掉新属性中不存在的属性
+    if (
+      nextProps.hasOwnProperty(propKey) ||
+      !lastProps.hasOwnProperty(propKey) ||
+      lastProps[propKey] === null
+    ) {
+      // 新的属性中有该属性
+      // 老的属性中没有该属性
+      continue;
+    }
+    if (propKey === STYLE) {
+      // 处理style属性
+      const lastStyle = lastProps[propKey];
+      for (styleName in lastStyle) {
+        if (lastStyle.hasOwnProperty(styleName)) {
+          if (!styleUpdates) {
+            styleUpdates = {};
+          }
+          styleUpdates[styleName] = "";
+        }
+      }
+    } else {
+      (updatePayload = updatePayload || []).push(propKey, null);
+    }
+  }
+  for (propKey in nextProps) {
+    const nextProp = nextProps[propKey];
+    const lastProp = lastProps !== null ? lastProps[propKey] : undefined;
+    if (
+      !nextProps.hasOwnProperty(propKey) ||
+      nextProp === lastProp ||
+      (nextProp === null && lastProp === null)
+    ) {
+      continue;
+    }
+    if (propKey === STYLE) {
+      if (lastProp) {
+        for (styleName in lastProp) {
+          if (
+            lastProp.hasOwnProperty(styleName) &&
+            (!nextProp || !nextProp.hasOwnProperty(styleName))
+          ) {
+            if (!styleUpdates) {
+              styleUpdates = {};
+            }
+            styleUpdates[styleName] = "";
+          }
+        }
+        for (styleName in nextProp) {
+          if (
+            nextProp.hasOwnProperty(styleName) &&
+            lastProp[styleName] !== nextProp[styleName]
+          ) {
+            if (!styleUpdates) {
+              styleUpdates = {};
+            }
+            styleUpdates[styleName] = nextProp[styleName];
+          }
+        }
+      } else {
+        styleUpdates = nextProp;
+      }
+    } else if (propKey === CHILDREN) {
+      if (typeof nextProp === "string" || typeof nextProp === "number") {
+        (updatePayload = updatePayload || []).push(propKey, nextProp);
+      }
+    } else {
+      (updatePayload = updatePayload || []).push(propKey, nextProp);
+    }
+  }
+  if (styleUpdates) {
+    (updatePayload = updatePayload || []).push(STYLE, styleUpdates);
+  }
+  return updatePayload;
+}
+
+export function updateProperties(domElement, updatePayload) {
+  updateDOMProperties(domElement, updatePayload);
+}
+
+function updateDOMProperties(domElement, updatePayload) {
+  for (let i = 0; i < updatePayload.length; i += 2) {
+    const propKey = updatePayload[i];
+    const propValue = updatePayload[i + 1];
+    if (propKey === STYLE) {
+      setValueForStyles(domElement, propValue);
+    } else if (propKey === CHILDREN) {
+      setTextContent(domElement, propValue);
+    } else {
+      setValueForProperty(domElement, propKey, propValue);
+    }
+  }
 }

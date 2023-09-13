@@ -1,8 +1,9 @@
 import {
   appendChild,
   insertBefore,
+  commitUpdate,
 } from "react-dom-bindings/src/client/ReactDOMHostConfig";
-import { Placement, MutationMask } from "./ReactFiberFlags";
+import { Placement, MutationMask, Update } from "./ReactFiberFlags";
 import {
   HostComponent,
   HostRoot,
@@ -146,13 +147,39 @@ function commitPlacement(finishedWork) {
  * @param {Fiber} root Fiber树的根节点
  */
 export function commitMutationEffectsOnFiber(finishedWork, root) {
+  const current = finishedWork.alternate;
+  const flags = finishedWork.flags;
   switch (finishedWork.tag) {
     case FunctionComponent:
     case HostRoot:
-    case HostComponent:
     case HostText: {
       recursivelyTraverseMutationEffects(root, finishedWork);
       commitReconciliationEffects(finishedWork);
+      break;
+    }
+    case HostComponent: {
+      recursivelyTraverseMutationEffects(root, finishedWork);
+      commitReconciliationEffects(finishedWork);
+      if (flags & Update) {
+        const instance = finishedWork.stateNode;
+        if (instance !== null) {
+          const newProps = finishedWork.memoizedProps;
+          const oldProps = current !== null ? current.memoizedProps : newProps;
+          const type = finishedWork.type;
+          const updatePayload = finishedWork.updateQueue;
+          finishedWork.updateQueue = null;
+          if (updatePayload) {
+            commitUpdate(
+              instance,
+              updatePayload,
+              type,
+              oldProps,
+              newProps,
+              finishedWork
+            );
+          }
+        }
+      }
       break;
     }
   }

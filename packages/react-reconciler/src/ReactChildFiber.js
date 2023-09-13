@@ -6,6 +6,7 @@ import {
 } from "./ReactFiber";
 import { Placement, ChildDeletion } from "./ReactFiberFlags";
 import isArray from "shared/isArray";
+import { HostText } from "./ReactWorkTags";
 
 /**
  * 创建Child Reconciler的函数
@@ -36,7 +37,7 @@ function createChildReconciler(shouldTrackSideEffects) {
   function reconcileSingleElement(returnFiber, currentFirstChild, element) {
     const key = element.key;
     let child = currentFirstChild;
-    while (child) {
+    while (child !== null) {
       if (child.key === key) {
         if (child.type === element.type) {
           deleteRemainingChildren(returnFiber, child.sibling);
@@ -47,8 +48,9 @@ function createChildReconciler(shouldTrackSideEffects) {
           deleteRemainingChildren(returnFiber, child);
         }
       } else {
-        child = child.sibling;
+        deleteChild(returnFiber, child);
       }
+      child = child.sibling;
     }
     const created = createFiberFromElement(element);
     created.return = returnFiber;
@@ -324,6 +326,7 @@ function createChildReconciler(shouldTrackSideEffects) {
     }
 
     const existingChildren = mapRemainingChildren(returnFiber, oldFiber);
+
     for (; newIdx < newChildren.length; newIdx++) {
       const newFiber = updateFromMap(
         existingChildren,

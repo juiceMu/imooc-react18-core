@@ -3,9 +3,40 @@ import {
   createInstance,
   appendInitialChild,
   finalizeInitialChildren,
+  prepareUpdate,
 } from "react-dom-bindings/src/client/ReactDOMHostConfig";
-import { NoFlags } from "./ReactFiberFlags";
-import { HostComponent, HostRoot, HostText } from "./ReactWorkTags";
+import { NoFlags, Update } from "./ReactFiberFlags";
+import {
+  HostComponent,
+  HostRoot,
+  HostText,
+  FunctionComponent,
+} from "./ReactWorkTags";
+
+/**
+ * 对fiber对象进行标记
+ * @param {*} workInProgress
+ */
+function markUpdate(workInProgress) {
+  workInProgress.flags |= Update;
+}
+
+/**
+ * 更新常规组件
+ * @param {Fiber} current 当前旧的Fiber节点
+ * @param {Fiber} workInProgress 新建的Fiber节点
+ * @param {*} type
+ * @param {*} newProps
+ */
+function updateHostComponent(current, workInProgress, type, newProps) {
+  const oldProps = current.memoizedProps; // 之前保存的属性
+  const instance = workInProgress.stateNode;
+  const updatePayload = prepareUpdate(instance, type, oldProps, newProps);
+  workInProgress.updateQueue = updatePayload;
+  if (updatePayload) {
+    markUpdate(workInProgress);
+  }
+}
 
 /**
  * 为完成的Fiber节点的父DOM节点添加所有子DOM节点
@@ -47,10 +78,18 @@ export function completeWork(current, workInProgress) {
       break;
     case HostComponent:
       const { type } = workInProgress;
-      const instance = createInstance(type, newProps, workInProgress);
-      appendAllChildren(instance, workInProgress);
-      workInProgress.stateNode = instance;
-      finalizeInitialChildren(instance, type, newProps);
+      if (current !== null && workInProgress.stateNode !== null) {
+        // 更新时
+        updateHostComponent(current, workInProgress, type, newProps);
+      } else {
+        const instance = createInstance(type, newProps, workInProgress);
+        appendAllChildren(instance, workInProgress);
+        workInProgress.stateNode = instance;
+        finalizeInitialChildren(instance, type, newProps);
+      }
+      bubbleProperties(workInProgress);
+      break;
+    case FunctionComponent:
       bubbleProperties(workInProgress);
       break;
     case HostText:

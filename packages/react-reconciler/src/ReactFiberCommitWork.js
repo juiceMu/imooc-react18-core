@@ -3,14 +3,24 @@ import {
   insertBefore,
   commitUpdate,
 } from "react-dom-bindings/src/client/ReactDOMHostConfig";
-import { Placement, MutationMask, Update } from "./ReactFiberFlags";
+import {
+  Placement,
+  MutationMask,
+  Update,
+  Passive,
+  LayoutMask,
+} from "./ReactFiberFlags";
 import {
   HostComponent,
   HostRoot,
   HostText,
   FunctionComponent,
-  Passive,
 } from "./ReactWorkTags";
+import {
+  HasEffect as HookHasEffect,
+  Passive as HookPassive,
+  Layout as HookLayout,
+} from "./ReactHookEffectTags";
 
 /**
  * 递归遍历所有子节点并在每个Fiber上应用mutation副作用
@@ -151,7 +161,14 @@ export function commitMutationEffectsOnFiber(finishedWork, root) {
   const current = finishedWork.alternate;
   const flags = finishedWork.flags;
   switch (finishedWork.tag) {
-    case FunctionComponent:
+    case FunctionComponent: {
+      recursivelyTraverseMutationEffects(root, finishedWork);
+      commitReconciliationEffects(finishedWork);
+      if (flags & Update) {
+        commitHookEffectListUnmount(HookHasEffect | HookLayout, finishedWork);
+      }
+      break;
+    }
     case HostRoot:
     case HostText: {
       recursivelyTraverseMutationEffects(root, finishedWork);
@@ -298,5 +315,42 @@ function commitHookEffectListMount(flags, finishedWork) {
       }
       effect = effect.next;
     } while (effect !== firstEffect);
+  }
+}
+
+export function commitLayoutEffects(finishedWork, root) {
+  const current = finishedWork.alternate;
+  commitLayoutEffectOnFiber(root, current, finishedWork);
+}
+
+function commitLayoutEffectOnFiber(finishedRoot, current, finishedWork) {
+  const flags = finishedWork.flags;
+  switch (finishedWork.tag) {
+    case HostRoot: {
+      recursivelyTraverseLayoutEffects(finishedRoot, finishedWork);
+      break;
+    }
+    case FunctionComponent: {
+      recursivelyTraverseLayoutEffects(finishedRoot, finishedWork);
+      if (flags & LayoutMask) {
+        commitHookLayoutEffects(finishedWork, HookHasEffect | HookLayout);
+      }
+      break;
+    }
+  }
+}
+
+function commitHookLayoutEffects(finishedWork, hookFlags) {
+  commitHookEffectListMount(hookFlags, finishedWork);
+}
+
+function recursivelyTraverseLayoutEffects(root, parentFiber) {
+  if (parentFiber.subtreeFlags & LayoutMask) {
+    let child = parentFiber.child;
+    while (child !== null) {
+      const current = child.alternate;
+      commitLayoutEffectOnFiber(root, current, child);
+      child = child.sibling;
+    }
   }
 }

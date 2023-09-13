@@ -11,8 +11,13 @@ function getAge(state, action) {
 }
 function MyFunctionComponent() {
   const [number, setAge] = React.useState(0);
+  React.useEffect(() => {
+    console.log("create");
+    return () => {
+      console.log("destroy");
+    };
+  }, []);
 
-  console.log("number: ", number);
   return (
     <button
       onClick={() => {

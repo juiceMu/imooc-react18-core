@@ -28,3 +28,8 @@ export function useEffect(create) {
   const dispatcher = resolveDispatcher();
   return dispatcher.useEffect(create);
 }
+
+export function useLayoutEffect(create, deps) {
+  const dispatcher = resolveDispatcher();
+  return dispatcher.useLayoutEffect(create, deps);
+}

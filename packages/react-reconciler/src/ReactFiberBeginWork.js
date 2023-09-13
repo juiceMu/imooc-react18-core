@@ -101,10 +101,8 @@ export function mountIndeterminateComponent(
 ) {
   const props = workInProgress.pendingProps;
   const value = renderWithHooks(current, workInProgress, Component, props);
-  console.log("value: ", value);
   workInProgress.tag = FunctionComponent;
   reconcileChildren(current, workInProgress, value);
-
   return workInProgress.child;
 }
 

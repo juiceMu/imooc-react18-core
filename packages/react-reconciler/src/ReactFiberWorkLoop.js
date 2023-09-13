@@ -3,10 +3,17 @@ import { createWorkInProgress } from "./ReactFiber";
 import { beginWork } from "./ReactFiberBeginWork";
 import { completeWork } from "./ReactFiberCompleteWork";
 import { MutationMask, NoFlags } from "./ReactFiberFlags";
-import { commitMutationEffectsOnFiber } from "./ReactFiberCommitWork";
+import {
+  commitMutationEffectsOnFiber,
+  commitPassiveUnmountEffects,
+  commitPassiveMountEffects,
+} from "./ReactFiberCommitWork";
 import { finishQueueingConcurrentUpdates } from "./ReactFiberConcurrentUpdates";
+import { Passive } from "./ReactWorkTags";
 
 let workInProgress = null;
+let rootDoesHavePassiveEffect = false;
+let rootWithPendingPassiveEffects = null;
 
 /**
  * 在Fiber上计划更新根节点
@@ -41,11 +48,25 @@ function performConcurrentWorkOnRoot(root) {
  */
 function commitRoot(root) {
   const { finishedWork } = root;
+  if (
+    (finishedWork.subtreeFlags & Passive) !== NoFlags ||
+    (finishedWork.flags & Passive) !== NoFlags
+  ) {
+    if (!rootDoesHavePassiveEffect) {
+      rootDoesHavePassiveEffect = true;
+      // 会等commitRoot这个函数都执行完毕之后，才会执行NormalSchedulerPriority, flushPassiveEffect，而不是走到这时，立即执行
+      scheduleCallback(flushPassiveEffect);
+    }
+  }
   const subtreeHasEffects =
     (finishedWork.subtreeFlags & MutationMask) !== NoFlags;
   const rootHasEffect = (finishedWork.flags & MutationMask) !== NoFlags;
   if (subtreeHasEffects || rootHasEffect) {
     commitMutationEffectsOnFiber(finishedWork, root);
+    if (rootDoesHavePassiveEffect) {
+      rootDoesHavePassiveEffect = false;
+      rootWithPendingPassiveEffects = root;
+    }
   }
   root.current = finishedWork;
 }
@@ -111,4 +132,12 @@ function completeUnitOfWork(unitOfWork) {
     completedWork = returnFiber;
     workInProgress = completedWork;
   } while (completedWork !== null);
+}
+
+function flushPassiveEffect() {
+  if (rootWithPendingPassiveEffects !== null) {
+    const root = rootWithPendingPassiveEffects;
+    commitPassiveUnmountEffects(root.current);
+    commitPassiveMountEffects(root, root.current);
+  }
 }

@@ -5,3 +5,7 @@ export const HostRoot = 3; // 表示宿主环境的根节点，例如在浏览�
 export const HostComponent = 5; // 表示宿主环境的常规节点，例如在浏览器环境中，这就代表了一个普通的 DOM 元素，如 div、span 等
 export const HostText = 6;
 // 表示宿主环境的文本节点，例如在浏览器环境中，这就代表了一个文本节点
+export const NoFlags = 0b0000;
+export const HasEffect = 0b0001;
+export const Layout = 0b0100;
+export const Passive = 0b1000;

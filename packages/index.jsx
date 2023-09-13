@@ -10,12 +10,14 @@ function getAge(state, action) {
   }
 }
 function MyFunctionComponent() {
-  const [number, setAge] = React.useReducer(getAge, 0);
+  const [number, setAge] = React.useState(0);
+
   console.log("number: ", number);
   return (
     <button
       onClick={() => {
-        setAge({ type: "add", value: 1 });
+        setAge(number + 1);
+        setAge(number + 1);
       }}
     >
       {number}

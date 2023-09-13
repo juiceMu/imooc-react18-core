@@ -12,10 +12,13 @@ let workInProgressHook = null;
 // Dispatcher对象在组件Mouth时使用的Hooks
 const HooksDispatcherOnMount = {
   useReducer: mountReducer, // 在mount期间，使用mountReducer处理useReducer
+  useState: mountState,
 };
 
+// Dispatcher对象在组件Update时使用的Hooks
 const HooksDispatcherOnUpdate = {
   useReducer: updateReducer,
+  useState: updateState,
 };
 
 /**
@@ -41,6 +44,24 @@ function mountReducer(reducer, initialArg) {
   return [hook.memoizedState, dispatch];
 }
 
+function mountState(initialState) {
+  const hook = mountWorkInProgressHook();
+  hook.memoizedState = initialState;
+  const queue = {
+    pending: null,
+    dispatch: null,
+    lastRenderedReducer: baseStateReducer,
+    lastRenderedState: initialState,
+  };
+  hook.queue = queue;
+  const dispatch = (queue.dispatch = dispatchSetState.bind(
+    null,
+    currentlyRenderingFiber,
+    queue
+  ));
+  return [hook.memoizedState, dispatch];
+}
+
 /**
  * Dispatch函数，用于处理reducer action的派发
  * @param {Object} fiber 当前正在处理的Fiber节点
@@ -52,6 +73,24 @@ function dispatchReducerAction(fiber, queue, action) {
     action,
     next: null,
   };
+  const root = enqueueConcurrentHookUpdate(fiber, queue, update);
+  scheduleUpdateOnFiber(root);
+}
+
+function dispatchSetState(fiber, queue, action) {
+  const update = {
+    action,
+    hasEagerState: false,
+    eagerState: null,
+    next: null,
+  };
+  const { lastRenderedReducer, lastRenderedState } = queue;
+  const eagerState = lastRenderedReducer(lastRenderedState, action);
+  update.hasEagerState = true;
+  update.eagerState = eagerState;
+  if (Object.is(eagerState, lastRenderedState)) {
+    return;
+  }
   const root = enqueueConcurrentHookUpdate(fiber, queue, update);
   scheduleUpdateOnFiber(root);
 }
@@ -129,6 +168,13 @@ function updateReducer(reducer) {
   return [hook.memoizedState, queue.dispatch];
 }
 
+function baseStateReducer(state, action) {
+  return typeof action === "function" ? action(state) : action;
+}
+
+function updateState() {
+  return updateReducer(baseStateReducer);
+}
 /**
  * 用hook渲染组件
  * @param {Object} current - 当前的Fiber节点

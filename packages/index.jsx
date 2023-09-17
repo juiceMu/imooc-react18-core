@@ -11,22 +11,34 @@ function getAge(state, action) {
 }
 function MyFunctionComponent() {
   const [number, setAge] = React.useState(0);
+  const [number1, setAge1] = React.useState(0);
+
+  console.log("number: ", number);
+  console.log("number1: ", number1);
   React.useEffect(() => {
     console.log("create");
     return () => {
       console.log("destroy");
     };
-  }, []);
+  }, [number]);
 
   return (
-    <button
-      onClick={() => {
-        setAge(number + 1);
-        setAge(number + 1);
-      }}
-    >
-      {number}
-    </button>
+    <div>
+      <button
+        onClick={() => {
+          setAge(number + 1);
+        }}
+      >
+        {number}
+      </button>
+      <button
+        onClick={() => {
+          setAge1(number1 + 1);
+        }}
+      >
+        {number1}
+      </button>
+    </div>
   );
 }
 const root = createRoot(document.getElementById("root"));

@@ -8,7 +8,7 @@ let concurrentQueuesIndex = 0;
 /**
  * 从源Fiber向上遍历树，找到根节点
  * @param {Fiber} sourceFiber 源Fiber
- * @returns {Node|null} 如果找到根节点，则返回根节点，否则返回null
+ * @returns {Node|null} 如果找到根节点(FiberRoot)，则返回根节点，否则返回null
  */
 export function markUpdateLaneFromFiberToRoot(sourceFiber) {
   let node = sourceFiber;
@@ -19,6 +19,8 @@ export function markUpdateLaneFromFiberToRoot(sourceFiber) {
   }
   // 持续向上遍历树，直到找到根节点
   if (node.tag === HostRoot) {
+    // 证明node为RootFiber，RootFiber.stateNode指向的是FiberRoot
+    // 所以返回FiberRoot
     return node.stateNode;
   }
   return null;

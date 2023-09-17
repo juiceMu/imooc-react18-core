@@ -20,7 +20,7 @@ export function FiberNode(tag, pendingProps, key) {
   this.return = null; //指向父 Fiber 节点的指针
   this.child = null; //指向第一个子 Fiber 节点的指针。
   this.sibling = null; //指向兄弟 Fiber 节点的指针。
-  this.pendingProps = pendingProps; // 等待剩下的props
+  this.pendingProps = pendingProps; // 等待生效的props
   this.memoizedProps = null; //已经生效的props
   this.memoizedState = null; //已经生效的state
   this.updateQueue = null; //等待更新的队列

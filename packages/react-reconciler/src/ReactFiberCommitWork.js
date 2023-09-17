@@ -308,6 +308,7 @@ function commitHookEffectListMount(flags, finishedWork) {
   if (lastEffect !== null) {
     const firstEffect = lastEffect.next;
     let effect = firstEffect;
+    console.log("effect: ", effect);
     do {
       if ((effect.tag & flags) === flags) {
         const create = effect.create;

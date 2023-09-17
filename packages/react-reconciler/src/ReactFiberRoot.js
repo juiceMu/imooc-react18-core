@@ -2,6 +2,14 @@ import { createHostRootFiber } from "./ReactFiber";
 import { initialUpdateQueue } from "./ReactFiberClassUpdateQueue";
 
 /**
+ * FiberRoot：就是整个应用程序的根。就是根节点
+ * RootFiber：整个Fiber树的根/起点
+ * 区分二者的最重要的点就是注意单词的最后一个词。
+ *   FiberRoot.current ---> RootFiber
+ * RootFiber.stateNode ---> FiberRoot
+ */
+
+/**
  * Fiber根节点对象构造函数
  * @param {*} containerInfo 容器信息
  */
@@ -18,7 +26,7 @@ export function createFiberRoot(containerInfo) {
   const root = new FiberRootNode(containerInfo);
   // 创建未初始化的根 Fiber
   const uninitializedFiber = createHostRootFiber();
-  // 根容器的current指向当前的根Fiber
+  // 根容器的current指向当前的根Fiber，也就是Fiber树
   root.current = uninitializedFiber;
   // 根Fiber的stateNode，即真实的DOM节点，指向FiberRootNode
   uninitializedFiber.stateNode = root;

@@ -11,13 +11,14 @@ import {
 import { finishQueueingConcurrentUpdates } from "./ReactFiberConcurrentUpdates";
 import { NoFlags, MutationMask, Passive } from "./ReactFiberFlags";
 
+// 指向工作中的Fiber节点
 let workInProgress = null;
 let rootDoesHavePassiveEffect = false;
 let rootWithPendingPassiveEffects = null;
 
 /**
  * 在Fiber上计划更新根节点
- * @param {*} root 根节点
+ * @param {*} root 根节点（FiberRoot）
  */
 export function scheduleUpdateOnFiber(root) {
   ensureRootIsScheduled(root);
@@ -36,9 +37,11 @@ function ensureRootIsScheduled(root) {
  * @param {*} root 根节点
  */
 function performConcurrentWorkOnRoot(root) {
+  // 开始对Fiber进行构建
   renderRootSync(root);
   const finishedWork = root.current.alternate;
   root.finishedWork = finishedWork;
+  // 把处理好的信息挂载到页面上
   commitRoot(root);
 }
 
@@ -94,7 +97,6 @@ function renderRootSync(root) {
  * 同步工作循环
  */
 function workLoopSync() {
-  //div
   while (workInProgress !== null) {
     performUnitOfWork(workInProgress);
   }
@@ -102,7 +104,7 @@ function workLoopSync() {
 
 /**
  * 执行一个工作单元
- * @param {*} unitOfWork 工作单元
+ * @param {*} unitOfWork 工作单元，即Fiber节点
  */
 function performUnitOfWork(unitOfWork) {
   const current = unitOfWork.alternate;

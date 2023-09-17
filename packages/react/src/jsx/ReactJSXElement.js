@@ -30,6 +30,11 @@ function ReactElement(type, key, ref, props) {
   };
 }
 
+/**
+ * 因为jsx会被转译工具（一般是babel）转化为React.createElement这样的函数调用，而我们实现了这个函数，
+ 把jsx转化为虚拟dom对象也可以抽象为两步，第一步将jsx转化为函数调用，第二步，将相关参数传给这个函数并返回虚拟dom值。
+ 只不过第一步是babel完成的，第二步是react内部实现的。所以我们要在react源码中实现这个能返回虚拟dom的函数。
+ */
 // 创建一个React元素的函数，处理key和ref属性，并将其他属性添加到props对象中
 export function jsxDEV(type, config, maybeKey) {
   let propName;

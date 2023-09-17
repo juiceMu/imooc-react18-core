@@ -39,6 +39,19 @@ export function enqueueConcurrentHookUpdate(fiber, queue, update, lane) {
 }
 
 /**
+ * 将类组件更新加入并发队列
+ * @param {Object} fiber - fiber对象
+ * @param {Object} queue - 更新队列
+ * @param {Object} update - 更新对象
+ * @param {number} lane - 车道信息
+ * @returns {Object|null} 更新的fiber的根，如果不存在则返回null
+ */
+export function enqueueConcurrentClassUpdate(fiber, queue, update, lane) {
+  enqueueUpdate(fiber, queue, update, lane);
+  return getRootForUpdatedFiber(fiber);
+}
+
+/**
  * 将更新加入并发队列
  * @param {Object} fiber fiber对象
  * @param {Object} queue 更新队列
@@ -49,7 +62,7 @@ function enqueueUpdate(fiber, queue, update, lane) {
   concurrentQueues[concurrentQueuesIndex++] = fiber;
   concurrentQueues[concurrentQueuesIndex++] = queue;
   concurrentQueues[concurrentQueuesIndex++] = update;
-  // concurrentQueues[concurrentQueuesIndex++] = lane;
+  concurrentQueues[concurrentQueuesIndex++] = lane;
 }
 
 /**
@@ -63,6 +76,7 @@ export function finishQueueingConcurrentUpdates() {
     const fiber = concurrentQueues[i++];
     const queue = concurrentQueues[i++];
     const update = concurrentQueues[i++];
+    const lane = concurrentQueues[i++];
     if (queue !== null && update !== null) {
       const pending = queue.pending;
       if (pending === null) {

@@ -1,4 +1,8 @@
-import { scheduleCallback } from "scheduler";
+import {
+  scheduleCallback,
+  NormalPriority as NormalSchedulerPriority,
+  shouldYield,
+} from "scheduler";
 import { createWorkInProgress } from "./ReactFiber";
 import { beginWork } from "./ReactFiberBeginWork";
 import { completeWork } from "./ReactFiberCompleteWork";
@@ -29,7 +33,10 @@ export function scheduleUpdateOnFiber(root) {
  * @param {*} root 根节点
  */
 function ensureRootIsScheduled(root) {
-  scheduleCallback(performConcurrentWorkOnRoot.bind(null, root));
+  scheduleCallback(
+    NormalSchedulerPriority,
+    performConcurrentWorkOnRoot.bind(null, root)
+  );
 }
 
 /**
@@ -58,7 +65,7 @@ function commitRoot(root) {
     if (!rootDoesHavePassiveEffect) {
       rootDoesHavePassiveEffect = true;
       // 会等commitRoot这个函数都执行完毕之后，才会执行NormalSchedulerPriority, flushPassiveEffect，而不是走到这时，立即执行
-      scheduleCallback(flushPassiveEffect);
+      scheduleCallback(NormalSchedulerPriority, flushPassiveEffect);
     }
   }
   const subtreeHasEffects =

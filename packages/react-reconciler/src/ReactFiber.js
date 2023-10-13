@@ -5,6 +5,7 @@ import {
   HostText,
 } from "./ReactWorkTags";
 import { NoFlags } from "./ReactFiberFlags";
+import { NoLanes } from "./ReactFiberLane";
 
 /**
  * 构造函数，用于创建一个新的Fiber节点
@@ -28,6 +29,7 @@ export function FiberNode(tag, pendingProps, key) {
   this.subtreeFlags = NoFlags;
   this.alternate = null; //指向当前 Fiber 节点的替代 Fiber 节点，这是双缓存技术的关键部分。
   this.index = 0; // 在同级节点中的序号
+  this.lanes = NoLanes;
 }
 
 /**

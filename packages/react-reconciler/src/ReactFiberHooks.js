@@ -1,5 +1,6 @@
 import ReactSharedInternals from "shared/ReactSharedInternals";
-import { scheduleUpdateOnFiber } from "./ReactFiberWorkLoop";
+import { scheduleUpdateOnFiber, requestUpdateLane } from "./ReactFiberWorkLoop";
+import { NoLane, NoLanes } from "./ReactFiberLane";
 import { enqueueConcurrentHookUpdate } from "./ReactFiberConcurrentUpdates";
 import {
   Passive as PassiveEffect,
@@ -45,6 +46,9 @@ function mountReducer(reducer, initialArg) {
   hook.memoizedState = initialArg; // 记录当前hook的初始状态
   const queue = {
     pending: null, // 初始化pending队列为null
+    dispatch: null,
+    lastRenderedReducer: reducer,
+    lastRenderedState: initialArg,
   };
   hook.queue = queue; // 将queue对象赋值给hook的queue属性
   // 创建dispatch函数，用于后续的action派发
@@ -155,21 +159,29 @@ function dispatchReducerAction(fiber, queue, action) {
 }
 
 function dispatchSetState(fiber, queue, action) {
+  const lane = requestUpdateLane();
   const update = {
+    lane,
     action,
     hasEagerState: false,
     eagerState: null,
     next: null,
   };
-  const { lastRenderedReducer, lastRenderedState } = queue;
-  const eagerState = lastRenderedReducer(lastRenderedState, action);
-  update.hasEagerState = true;
-  update.eagerState = eagerState;
-  if (Object.is(eagerState, lastRenderedState)) {
-    return;
+  const alternate = fiber.alternate;
+  if (
+    fiber.lanes === NoLanes &&
+    (alternate === null || alternate.lanes == NoLanes)
+  ) {
+    const { lastRenderedReducer, lastRenderedState } = queue;
+    const eagerState = lastRenderedReducer(lastRenderedState, action);
+    update.hasEagerState = true;
+    update.eagerState = eagerState;
+    if (Object.is(eagerState, lastRenderedState)) {
+      return;
+    }
   }
-  const root = enqueueConcurrentHookUpdate(fiber, queue, update);
-  scheduleUpdateOnFiber(root);
+  const root = enqueueConcurrentHookUpdate(fiber, queue, update, lane);
+  scheduleUpdateOnFiber(root, fiber, lane);
 }
 
 /**

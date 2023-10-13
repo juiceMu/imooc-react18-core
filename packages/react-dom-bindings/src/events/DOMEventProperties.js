@@ -1,6 +1,13 @@
 // 导入 EventRegistry 模块中的 registerTwoPhaseEvent 函数
 import { registerTwoPhaseEvent } from "./EventRegistry";
 
+import {
+  ContinuousEventPriority,
+  DefaultEventPriority,
+  DiscreteEventPriority,
+  IdleEventPriority,
+  getCurrentUpdatePriority,
+} from "react-reconciler/src/ReactEventPriorities";
 // 定义一个包含 'click' 的事件数组
 const simpleEventPluginEvents = ["click"];
 
@@ -34,5 +41,15 @@ export function registerSimpleEvents() {
     // 调用registerSimpleEvent函数，注册该事件
     // 其中，reactName是'on'加上capitalizeEvent
     registerSimpleEvent(domEventName, `on${capitalizeEvent}`);
+  }
+}
+export function getEventPriority(domEventName) {
+  switch (domEventName) {
+    case "click":
+      return DiscreteEventPriority;
+    case "drag":
+      return ContinuousEventPriority;
+    default:
+      return DefaultEventPriority;
   }
 }

@@ -4,7 +4,7 @@ import {
   updateProperties,
 } from "./ReactDOMComponent";
 import { precacheFiberNode, updateFiberProps } from "./ReactDOMComponentTree";
-
+import { DefaultEventPriority } from "react-reconciler/src/ReactEventPriorities";
 /**
  * 判断是否需要设置文本内容 -- 用于判断基于给定的属性，是否应该设置DOM元素的文本内容
  * @param {string} type DOM元素的类型
@@ -96,4 +96,12 @@ export function commitUpdate(
 ) {
   updateProperties(domElement, updatePayload, type, oldProps, newProps);
   updateFiberProps(domElement, newProps);
+}
+
+export function getCurrentEventPriority() {
+  const currentEvent = window.event;
+  if (currentEvent === undefined) {
+    return DefaultEventPriority;
+  }
+  return getEventPriority(currentEvent.type);
 }

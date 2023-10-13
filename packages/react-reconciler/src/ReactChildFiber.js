@@ -96,6 +96,8 @@ function createChildReconciler(shouldTrackSideEffects) {
    */
   function placeSingleChild(newFiber) {
     if (shouldTrackSideEffects) {
+      // 这个逻辑主要是在更新的时候用
+      // 更新时就会根据flags只要节点需要做哪些操作
       newFiber.flags |= Placement;
     }
     return newFiber;
@@ -274,7 +276,7 @@ function createChildReconciler(shouldTrackSideEffects) {
    * @param {Fiber} returnFiber 新的父Fiber
    * @param {Fiber} currentFirstChild 老Fiber第一个子Fiber
    * @param {Array} newChildren 新的子节点数组
-   * @returns {Fiber} resultingFirstChild 返回新的子Fiber
+   * @returns {Fiber} resultingFirstChild 返回新的子Fiber，且只返回第一个子Fiber
    */
   function reconcileChildrenArray(returnFiber, currentFirstChild, newChildren) {
     let resultingFirstChild = null;

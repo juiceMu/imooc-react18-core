@@ -5,7 +5,7 @@ import {
   UserBlockingPriority as UserBlockingSchedulerPriority,
   NormalPriority as NormalSchedulerPriority,
   IdlePriority as IdleSchedulerPriority,
-} from "scheduler";
+} from "./Scheduler";
 
 import {
   NoLane,

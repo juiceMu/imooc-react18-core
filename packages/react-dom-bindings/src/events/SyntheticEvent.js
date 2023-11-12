@@ -47,7 +47,7 @@ function createSyntheticEvent(Interface) {
       }
       this[propName] = nativeEvent[propName];
     }
-    // 初始状态下，事件的幕刃行为不被阻止，事件传播也没有被停止
+    // 初始状态下，事件的默认行为不被阻止，事件传播也没有被停止
     this.isDefaultPrevented = functionThatReturnsFalse;
     this.isPropagationStopped = functionThatReturnsFalse;
     return this;

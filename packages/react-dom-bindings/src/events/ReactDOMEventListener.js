@@ -28,7 +28,7 @@ export function createEventListenerWrapperWithPriority(
  * @param {string} domEventName - DOM事件名称
  * @param {number} eventSystemFlags - 事件系统标志，用于表示事件在哪个阶段（冒泡/捕获）
  * @param {HTMLElement} container - 目标容器，通常是一个HTML元素
- * @param {Event} nativeEvent - 原生的浏览器事件对象
+ * @param {Event} nativeEvent - 触发事件的事件源，原生的浏览器事件对象
  */
 function dispatchDiscreteEvent(
   domEventName,
@@ -44,7 +44,7 @@ function dispatchDiscreteEvent(
  * @param {string} domEventName - DOM事件名称。
  * @param {number} eventSystemFlags - 事件系统标志，用于表示事件在哪个阶段（冒泡/捕获）
  * @param {HTMLElement} targetContainer - 目标容器，通常是一个HTML元素
- * @param {Event} nativeEvent - 原生的浏览器事件对象
+ * @param {Event} nativeEvent - 触发事件的事件源，原生的浏览器事件对象
  */
 export function dispatchEvent(
   domEventName,
@@ -52,8 +52,9 @@ export function dispatchEvent(
   targetContainer,
   nativeEvent
 ) {
-  // 获取原生事件的目标元素
+  // 获取原生事件的目标元素（触发事件的dom元素）
   const nativeEventTarget = getEventTarget(nativeEvent);
+  // 获取目标实例即Fiber对象
   const targetInst = getClosestInstanceFromNode(nativeEventTarget);
   dispatchEventForPluginEventSystem(
     domEventName,

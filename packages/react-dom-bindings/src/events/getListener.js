@@ -4,7 +4,7 @@ import { getFiberCurrentPropsFromNode } from "../client/ReactDOMComponentTree";
  * 从给定的React实例中获取指定事件的监听函数
  * @param {Object} instance React实例
  * @param {string} registrationName 注册的事件名（例如，'onClick'
- * @returns {Function|null} 返回该事件的监听函数，如果不存在则返回null
+ * @returns {Function|null} 返回dom元素上该事件的监听函数，如果不存在则返回null
  */
 export default function getListener(instance, registrationName) {
   // 从实例中取出状态节点

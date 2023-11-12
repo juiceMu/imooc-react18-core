@@ -27,5 +27,5 @@ export function updateContainer(element, container) {
   // 将更新添加到当前根Fiber的更新队列上，并返回根节点
   const root = enqueueUpdate(current, update, lane);
   // 在根Fiber上调度更新
-  scheduleUpdateOnFiber(root, lane);
+  scheduleUpdateOnFiber(root, current, lane);
 }

@@ -44,7 +44,7 @@ function updateHostComponent(current, workInProgress, type, newProps) {
  * @param {Fiber} workInProgress 已完成的Fiber节点
  */
 function appendAllChildren(parent, workInProgress) {
-  let node = workInProgress.child;
+  let node = workInProgress.child; // 子fiber
   while (node) {
     if (node.tag === HostComponent || node.tag === HostText) {
       appendInitialChild(parent, node.stateNode);
@@ -112,5 +112,6 @@ function bubbleProperties(completedWork) {
     subtreeFlags |= child.flags;
     child = child.sibling;
   }
+  // 将子节点的所有操作集合在父级节点上
   completedWork.subtreeFlags = subtreeFlags;
 }

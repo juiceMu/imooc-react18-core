@@ -39,7 +39,6 @@ function extractEvents(
       break;
   }
   // 通过与运算确定事件是否处于捕获阶段
-  // TODO:
   const isCapturePhase = (eventSystemFlags & IS_CAPTURE_PHASE) !== 0;
   // 使用accumulateSinglePhaseListeners函数获取当前阶段的所有事件监听器
   const listeners = accumulateSinglePhaseListeners(
@@ -59,6 +58,9 @@ function extractEvents(
       nativeEventTarget
     );
     // 并将其与相应的监听器一起加入调度队列
+    // 不是直接使用原生事件，而是重新包装成一个新事件的原因：
+    // 1.抹平不同浏览器中的差异
+    // 2.提升性能
     dispatchQueue.push({
       event,
       listeners,

@@ -29,6 +29,7 @@ import {
  */
 function recursivelyTraverseMutationEffects(root, parentFiber) {
   if (parentFiber.subtreeFlags & MutationMask) {
+    // 证明有需要提交的内容
     let { child } = parentFiber;
     while (child !== null) {
       commitMutationEffectsOnFiber(child, root);
@@ -44,6 +45,7 @@ function recursivelyTraverseMutationEffects(root, parentFiber) {
 function commitReconciliationEffects(finishedWork) {
   const { flags } = finishedWork;
   if (flags & Placement) {
+    // 证明存在插入的动作
     commitPlacement(finishedWork);
     finishedWork.flags &= ~Placement;
   }

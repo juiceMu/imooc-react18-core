@@ -9,7 +9,7 @@ import {
 import getEventTarget from "./getEventTarget";
 import { HostComponent } from "react-reconciler/src/ReactWorkTags";
 import getListener from "./getListener";
-
+// 注册事件
 SimpleEventPlugin.registerEvents();
 const listeningMarker = `_reactListening` + Math.random().toString(36).slice(2);
 
@@ -19,6 +19,7 @@ const listeningMarker = `_reactListening` + Math.random().toString(36).slice(2);
  */
 export function listenToAllSupportedEvents(rootContainerElement) {
   // 如果此元素尚未标记为已监听，则监听所有原生事件
+  // 只注册一次事件
   if (!rootContainerElement[listeningMarker]) {
     rootContainerElement[listeningMarker] = true;
     allNativeEvents.forEach((domEventName) => {
@@ -123,6 +124,7 @@ function dispatchEventForPlugins(
   // 分发队列
   const dispatchQueue = [];
   // 提取事件
+  // 通过对一系列的参数进行提取后，将事件放入dispatchQueue中
   extractEvents(
     dispatchQueue,
     domEventName,
@@ -223,11 +225,12 @@ function processDispatchQueueItemsInOrder(
 }
 
 /**
- * 累积单阶段监听器
+ * 收集/累积单阶段监听器
  * @param {Fiber} targetFiber 目标Fiber实例
  * @param {string} reactName React事件名称
  * @param {string} nativeEventType 原生事件类型
  * @param {boolean} isCapturePhase 是否在捕获阶段
+ * @returns listeners 监听器数组
  */
 export function accumulateSinglePhaseListeners(
   targetFiber,

@@ -7,7 +7,6 @@ import {
   IdlePriority,
 } from "./SchedulerPriorities";
 
-const frameInterval = 5; // 预期任务执行的间隔
 const maxSigned31BitInt = 1073741823;
 const IMMEDIATE_PRIORITY_TIMEOUT = -1;
 const USER_BLOCKING_PRIORITY_TIMEOUT = 250;
@@ -19,6 +18,8 @@ let scheduleHostCallback = null;
 let taskIdCounter = 1; // 任务计数器
 let taskQueue = []; // 任务最小堆数组
 let currentTask = null;
+let startTime = -1;
+const frameInterval = 5; // 预期任务执行的间隔
 
 const channel = new MessageChannel();
 let port2 = channel.port2;
